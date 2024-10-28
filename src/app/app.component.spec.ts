@@ -53,7 +53,12 @@ describe('AppComponent', () => {
 
       component.calculateLoan();
 
-      expect(component.maxLoanAmount).toEqual(450000); // (60000 + 30000) * 5
+      const combinedIncome = (60000 + 30000) * 5; // Total income multiplied by 5
+      const interestRate = 0.05; // For 30 years
+      const totalInterest = combinedIncome * interestRate * 30; // Total interest calculation
+      const expectedLoanAmount = combinedIncome - totalInterest; // Total loan amount after interest deduction
+
+      expect(component.maxLoanAmount).toEqual(expectedLoanAmount);
     });
 
     it('should calculate maximum loan amount correctly with student loan', () => {
@@ -67,7 +72,13 @@ describe('AppComponent', () => {
 
       component.calculateLoan();
 
-      expect(component.maxLoanAmount).toEqual(337500); // (60000 + 30000) * 5 * 0.75
+      const combinedIncome = (60000 + 30000) * 5; // Total income multiplied by 5
+      const interestRate = 0.05; // For 30 years
+      const totalInterest = combinedIncome * interestRate * 30; // Total interest calculation
+      const loanWithInterest = combinedIncome - totalInterest; // Subtract interest from max loan amount
+      const reducedLoanAmount = loanWithInterest * 0.75; // Apply 25% reduction for student loan
+
+      expect(component.maxLoanAmount).toEqual(reducedLoanAmount);
     });
   });
 
@@ -111,9 +122,14 @@ describe('AppComponent', () => {
       component.calculateLoan();
       fixture.detectChanges();
 
+      const combinedIncome = (60000 + 30000) * 5;
+      const interestRate = 0.05; // for 30 years from interestRates Map
+      const totalInterest = combinedIncome * interestRate * 30;
+      const expectedLoanAmount = combinedIncome - totalInterest;
+
       const loanAmountElement = fixture.debugElement.query(By.css('p'));
       expect(loanAmountElement.nativeElement.textContent).toContain(
-        'Maximum loan amount: 450000'
+        `Maximum loan amount: ${expectedLoanAmount}`
       );
     });
 

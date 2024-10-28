@@ -14,13 +14,13 @@ import { CommonModule } from '@angular/common';
 export class AppComponent {
   mortgageForm: FormGroup;
   maxLoanAmount: number | null = null;
-  interestRates = {
-    1: 0.02,
-    5: 0.03,
-    10: 0.035,
-    20: 0.045,
-    30: 0.05,
-  };
+  interestRates = new Map<number, number>([
+    [1, 0.02],
+    [5, 0.03],
+    [10, 0.035],
+    [20, 0.045],
+    [30, 0.05],
+  ]);
 
   constructor(private fb: FormBuilder) {
     this.mortgageForm = this.fb.group({
@@ -31,7 +31,7 @@ export class AppComponent {
       ],
       partnerIncome: ['', [Validators.pattern(/^\d*$/)]],
       hasStudentLoan: [false],
-      postalCode: ['', [Validators.required, this.postalCodeValidator]], // Added postal code field
+      postalCode: ['', [Validators.required, this.postalCodeValidator]],
     });
   }
 
@@ -52,11 +52,15 @@ export class AppComponent {
       const hasStudentLoan = this.mortgageForm.value.hasStudentLoan;
 
       const combinedIncome = annualIncome + partnerIncome;
-      let maxLoanAmount = combinedIncome * 5; // Basic multiplier for max loan calculation
+      let maxLoanAmount = combinedIncome * 5;
 
       if (hasStudentLoan) {
-        maxLoanAmount *= 0.75; // Reduce loan amount by 25% if the customer has a student loan
+        maxLoanAmount *= 0.5; // Reduces loan by 25%
       }
+
+      const interestRate = this.interestRates.get(fixedInterestPeriod) || 0;
+      const totalInterest = maxLoanAmount * interestRate * fixedInterestPeriod;
+      maxLoanAmount -= totalInterest; // Deduct interest from max loan amount
 
       this.maxLoanAmount = maxLoanAmount;
     }
